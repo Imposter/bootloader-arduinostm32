@@ -74,7 +74,13 @@ workspace("bootloader-arduinostm32")
         filter("configurations:*")
             optimize("Size")
             buildoptions({
-                "-g -mcpu=" .. chipset
+                "-g -mcpu=" .. chipset,
+
+                "-ffunction-sections -fdata-sections",
+                "-Wall -Wimplicit",
+                "-Wcast-align",
+                "-Wpointer-arith -Wswitch",
+                "-Wredundant-decls -Wreturn-type -Wshadow -Wunused"
             })
 
             linkoptions({
@@ -86,21 +92,18 @@ workspace("bootloader-arduinostm32")
 
             postbuildcommands({
                 -- Generate files
-                toolchain_tool("objcopy", "-O ihex %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.hex")
-                toolchain_tool("objcopy", "-O binary %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.bin")
+                toolchain_tool("objcopy", "-O ihex %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.hex"),
+                toolchain_tool("objcopy", "-O binary %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.bin"),
                 toolchain_tool("objdump", "-h -S -D %{cfg.buildtarget.relpath} > %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.lss")                
-            })
-
-        filter("files:**.c")
-            buildoptions({
-                "-ffunction-sections -fdata-sections",
-                "-Wall -Wimplicit",
-                "-Wcast-align",
-                "-Wpointer-arith -Wswitch",
-                "-Wredundant-decls -Wreturn-type -Wshadow -Wunused"
             })
 
         -- TODO: Different header files for each target so we don't have to do this!
         filter("configurations:maple-mini")
             defines({ "TARGET_MAPLE_MINI" })
             linkoptions({ "-T" .. _RA("src/stm32_lib/c_only_md_high_density.ld") })
+        
+        filter("configurations:generic-pc13")
+            defines({ "TARGET_GENERIC_F103_PC13" })
+            linkoptions({ "-T" .. _RA("src/stm32_lib/c_only_md_high_density.ld") })
+
+        

@@ -376,7 +376,7 @@
 
 // Check if button pulldown should be enabled 
 // Default to True as this was the default prior to needing to disable it
-// in order to use the boot1 pin on the Blue Pill which has a very week pullup
+// in order to use the boot1 pin on the Blue Pill which has a very weak pullup
 #ifndef BUTTON_INPUT_MODE
 	#define BUTTON_INPUT_MODE 	CR_INPUT_PU_PD
 #endif
@@ -390,13 +390,20 @@
 #endif
 #endif
 
-// defines for USB (DONT CHANGE)
+// TODO: Clean this file up and move all board specific stuff to Lua/JSON files
+
+// USB Definitions
+#if !defined(VEND_ID0) || !defined(VEND_ID1)
 #define VEND_ID0 0xAF
 #define VEND_ID1 0x1E
+#endif
+#if !defined(PROD_ID0) || !defined(PROD_ID1)
 #define PROD_ID0 0x03
 #define PROD_ID1 0x00
+#endif
 
 // Value to place in RTC backup register 10 for persistent bootloader mode
 #define RTC_BOOTLOADER_FLAG 0x424C
 #define RTC_BOOTLOADER_JUST_UPLOADED 0x424D
+
 #endif
