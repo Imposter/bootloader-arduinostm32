@@ -34,6 +34,34 @@
 
 #include "usb_descriptor.h"
 
+#define LEAFLABS_ID_VENDOR                0x1EAF
+#define MAPLE_ID_PRODUCT                  0x0003
+
+/** 
+ * Global USB definitions
+ */
+#ifndef USB_DEF_VENDOR_ID
+#define USB_DEF_VENDOR_ID LEAFLABS_ID_VENDOR
+#endif
+#ifndef USB_DEF_PRODUCT_ID
+#define USB_DEF_PRODUCT_ID MAPLE_ID_PRODUCT
+#endif
+#ifndef USB_DEF_REVISION
+#define USB_DEF_REVISION 0x0201
+#endif
+#if !defined(USB_DEF_VENDOR_DESC) || !defined(USB_DEF_VENDOR_DESC_LEN)
+#define USB_DEF_VENDOR_DESC 'L', 0, 'e', 0, 'a', 0, 'f', 0, 'L', 0, 'a', 0, 'b', 0, 's', 0
+#define USB_DEF_VENDOR_DESC_LEN 8
+#endif
+#if !defined(USB_DEF_PRODUCT_DESC) || !defined(USB_DEF_PRODUCT_DESC_LEN)
+#define USB_DEF_PRODUCT_DESC 'M', 0, 'a', 0, 'p', 0, 'l', 0, 'e', 0
+#define USB_DEF_PRODUCT_DESC_LEN 5
+#endif
+#if !defined(USB_DEF_SERIAL_DESC) || !defined(USB_DEF_SERIAL_DESC_LEN)
+#define USB_DEF_SERIAL_DESC 'L', 0, 'L', 0, 'M', 0, ' ', 0, '0', 0, '0', 0, '3', 0
+#define USB_DEF_SERIAL_DESC_LEN 7
+#endif
+
 u8 u8_usbDeviceDescriptorDFU[18] = {
     0x12,   /* bLength */
     0x01,   /* bDescriptorType */
@@ -43,14 +71,14 @@ u8 u8_usbDeviceDescriptorDFU[18] = {
     0x00,   /* bDeviceSubClass : See interface*/
     0x00,   /* bDeviceProtocol : See interface */
     bMaxPacketSize, /* bMaxPacketSize0 0x40 = 64 */
-    VEND_ID0,   /* idVendor     (0110) */
-    VEND_ID1,
+    (u8)USB_DEF_VENDOR_ID,   /* idVendor     (0110) */
+    (u8)(USB_DEF_VENDOR_ID >> 8),
 
-    PROD_ID0,   /* idProduct (0x1001 or 1002) */
-    PROD_ID1,
+    (u8)USB_DEF_PRODUCT_ID,   /* idProduct (0x1001 or 1002) */
+    (u8)(USB_DEF_PRODUCT_ID >> 8),
 
-    0x01,   /* bcdDevice*/
-    0x02,
+    (u8)USB_DEF_REVISION,   /* bcdDevice -- device revision */
+    (u8)(USB_DEF_REVISION >> 8),
     0x01,   /* iManufacturer : index of string Manufacturer  */
     0x02,   /* iProduct      : index of string descriptor of product*/
     0x03,   /* iSerialNumber : index of string serial number*/
@@ -159,52 +187,51 @@ u8 u8_usbStringLangId[USB_STR_LANG_ID_LEN] = {
     0x09,
     0x04    /* LangID = 0x0409: U.S. English */
 };
-#define USB_VENDOR_STR_LEN 0x12
-u8 u8_usbStringVendor[USB_VENDOR_STR_LEN] = {
-    USB_VENDOR_STR_LEN,
+
+#define USB_STR_BASE_LEN 2
+#define USB_STR_LEN(x) ((x * 2) + USB_STR_BASE_LEN)
+u8 u8_usbStringVendor[USB_STR_LEN(USB_DEF_VENDOR_DESC_LEN)] = {
+    USB_STR_LEN(USB_DEF_VENDOR_DESC_LEN),
     0x03,
-    'L', 0, 'e', 0, 'a', 0, 'f', 0, 'L', 0, 'a', 0, 'b', 0, 's', 0
+    USB_DEF_VENDOR_DESC
 };
-#define USB_PRODUCT_STR_LEN 0x14
-u8 u8_usbStringProduct[USB_PRODUCT_STR_LEN] = {
-    USB_PRODUCT_STR_LEN,
+u8 u8_usbStringProduct[USB_STR_LEN(USB_DEF_PRODUCT_DESC_LEN)] = {
+    USB_STR_LEN(USB_DEF_PRODUCT_DESC_LEN),
     0x03,
-    'M', 0, 'a', 0, 'p', 0, 'l', 0, 'e', 0, ' ', 0, '0', 0, '0', 0, '3', 0
+    USB_DEF_PRODUCT_DESC
 };
-#define USB_SERIAL_STR_LEN 0x10
-u8 u8_usbStringSerial[USB_SERIAL_STR_LEN] = {
-    USB_SERIAL_STR_LEN,
+u8 u8_usbStringSerial[USB_STR_LEN(USB_DEF_SERIAL_DESC_LEN)] = {
+    USB_STR_LEN(USB_DEF_SERIAL_DESC_LEN),
     0x03,
-    'L', 0, 'L', 0, 'M', 0, ' ', 0, '0', 0, '0', 0, '3', 0
+    USB_DEF_SERIAL_DESC
 };
 
-    u8 u8_usbStringAlt0[ALT0_STR_LEN] = {
+// TODO: Alternate strings?...
+u8 u8_usbStringAlt0[ALT0_STR_LEN] = {
     ALT0_STR_LEN,
     0x03,
     ALT0_MSG_STR
-    };
+};
 
-
-    u8 u8_usbStringAlt1[ALT1_STR_LEN] = {
+u8 u8_usbStringAlt1[ALT1_STR_LEN] = {
     ALT1_STR_LEN,
     0x03,
     ALT1_MSG_STR
-    };
+};
 
-
-    u8 u8_usbStringAlt2[ALT2_STR_LEN] = {
+u8 u8_usbStringAlt2[ALT2_STR_LEN] = {
     ALT2_STR_LEN,
     0x03,
     ALT2_MSG_STR
-    };
+};
 
 u8 u8_usbStringInterface = NULL;
 
 ONE_DESCRIPTOR usbStringDescriptor[STR_DESC_LEN] = {
     { (u8 *)u8_usbStringLangId,  USB_STR_LANG_ID_LEN },
-    { (u8 *)u8_usbStringVendor,  USB_VENDOR_STR_LEN },
-    { (u8 *)u8_usbStringProduct, USB_PRODUCT_STR_LEN },
-    { (u8 *)u8_usbStringSerial,  USB_SERIAL_STR_LEN },
+    { (u8 *)u8_usbStringVendor,  USB_STR_LEN(USB_DEF_VENDOR_DESC_LEN) },
+    { (u8 *)u8_usbStringProduct, USB_STR_LEN(USB_DEF_PRODUCT_DESC_LEN) },
+    { (u8 *)u8_usbStringSerial,  USB_STR_LEN(USB_DEF_SERIAL_DESC_LEN) },
     { (u8 *)u8_usbStringAlt0,    ALT0_STR_LEN },
     { (u8 *)u8_usbStringAlt1,    ALT1_STR_LEN },
     { (u8 *)u8_usbStringAlt2,    ALT2_STR_LEN }

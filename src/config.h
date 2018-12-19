@@ -51,15 +51,15 @@
 
 
 // Use the usb_description_strings_util.html to make new strngs for the next 3 arrays if you need to change the text.
+// Generic strings without any particular bootloader branding
+#define ALT0_STR_LEN 0x48
+#define ALT0_MSG_STR 'E',0,'R',0,'R',0,'O',0,'R',0,'.',0,' ',0,'U',0,'p',0,'l',0,'o',0,'a',0,'d',0,' ',0,'t',0,'o',0,' ',0,'R',0,'A',0,'M',0,' ',0,'n',0,'o',0,'t',0,' ',0,'s',0,'u',0,'p',0,'p',0,'o',0,'r',0,'t',0,'e',0,'d',0,'.',0
 
-#define ALT0_STR_LEN 0x80
-#define ALT0_MSG_STR 'S',0,'T',0,'M',0,'3',0,'2',0,'d',0,'u',0,'i',0,'n',0,'o',0,' ',0,'b',0,'o',0,'o',0,'t',0,'l',0,'o',0,'a',0,'d',0,'e',0,'r',0,' ',0,'v',0,'1',0,'.',0,'0',0,' ',0,' ',0,'E',0,'R',0,'R',0,'O',0,'R',0,'.',0,' ',0,'U',0,'p',0,'l',0,'o',0,'a',0,'d',0,' ',0,'t',0,'o',0,' ',0,'R',0,'A',0,'M',0,' ',0,'n',0,'o',0,'t',0,' ',0,'s',0,'u',0,'p',0,'p',0,'o',0,'r',0,'t',0,'e',0,'d',0,'.',0
+#define ALT1_STR_LEN 0x34
+#define ALT1_MSG_STR 'U',0,'p',0,'l',0,'o',0,'a',0,'d',0,' ',0,'t',0,'o',0,' ',0,'F',0,'l',0,'a',0,'s',0,'h',0,' ',0,'0',0,'x',0,'8',0,'0',0,'0',0,'5',0,'0',0,'0',0,'0',0
 
-#define ALT1_STR_LEN 0x6C
-#define ALT1_MSG_STR 'S',0,'T',0,'M',0,'3',0,'2',0,'d',0,'u',0,'i',0,'n',0,'o',0,' ',0,'b',0,'o',0,'o',0,'t',0,'l',0,'o',0,'a',0,'d',0,'e',0,'r',0,' ',0,'v',0,'1',0,'.',0,'0',0,' ',0,' ',0,'U',0,'p',0,'l',0,'o',0,'a',0,'d',0,' ',0,'t',0,'o',0,' ',0,'F',0,'l',0,'a',0,'s',0,'h',0,' ',0,'0',0,'x',0,'8',0,'0',0,'0',0,'5',0,'0',0,'0',0,'0',0
-
-#define ALT2_STR_LEN 0x6C
-#define ALT2_MSG_STR 'S',0,'T',0,'M',0,'3',0,'2',0,'d',0,'u',0,'i',0,'n',0,'o',0,' ',0,'b',0,'o',0,'o',0,'t',0,'l',0,'o',0,'a',0,'d',0,'e',0,'r',0,' ',0,'v',0,'1',0,'.',0,'0',0,' ',0,' ',0,'U',0,'p',0,'l',0,'o',0,'a',0,'d',0,' ',0,'t',0,'o',0,' ',0,'F',0,'l',0,'a',0,'s',0,'h',0,' ',0,'0',0,'x',0,'8',0,'0',0,'0',0,'2',0,'0',0,'0',0,'0',0
+#define ALT2_STR_LEN 0x34
+#define ALT2_MSG_STR 'U',0,'p',0,'l',0,'o',0,'a',0,'d',0,' ',0,'t',0,'o',0,' ',0,'F',0,'l',0,'a',0,'s',0,'h',0,' ',0,'0',0,'x',0,'8',0,'0',0,'0',0,'2',0,'0',0,'0',0,'0',0
 
 // Jump locations for legacy bootloader (0x8005000) and new / smaller bootloder (0x8002000)
 #define USER_CODE_FLASH0X8005000    ((u32)0x08005000)
@@ -388,18 +388,6 @@
 #else
     #define BOOTLOADER_WAIT 30
 #endif
-#endif
-
-// TODO: Clean this file up and move all board specific stuff to Lua/JSON files
-
-// USB Definitions
-#if !defined(VEND_ID0) || !defined(VEND_ID1)
-#define VEND_ID0 0xAF
-#define VEND_ID1 0x1E
-#endif
-#if !defined(PROD_ID0) || !defined(PROD_ID1)
-#define PROD_ID0 0x03
-#define PROD_ID1 0x00
 #endif
 
 // Value to place in RTC backup register 10 for persistent bootloader mode

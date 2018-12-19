@@ -4,21 +4,70 @@
     Jonatan Olofsson and LeafLabs
 --]]
 
-chipset = "cortex-m3"
-toolchain_prefix = "arm-none-eabi-"
+_CHIPSET = "cortex-m3"
+_TOOLCHAIN_PREFIX = "arm-none-eabi-"
 
-function toolchain_tool(name, args)
+function TOOLCHAIN_TOOL(name, args)
     if (args ~= nil) then
-        return toolchain_prefix .. name .. " " .. args
+        return _TOOLCHAIN_PREFIX .. name .. " " .. args
     end
-    return toolchain_prefix .. name
+    return _TOOLCHAIN_PREFIX .. name
 end
 
 -- Utility
+-- Override premake's escape function
+function premake.esc(obj)
+    if (type(obj) ~= "string") then
+        return obj
+    end
+
+    local str = tostring(obj)
+    str = str:gsub('\\', '\\\\')
+    --str = str:gsub('"', '\\"')
+    
+	return str
+end
+
 -- Relative to Absolute
 function _RA(p)
 	return path.getabsolute(p)
 end
+
+function USB_STR(str)
+    local res = ""
+    for i = 1, #str do
+        local c = str:sub(i, i)
+        res = res .. "'" .. c .. "',0,"
+    end
+    return res:sub(1, #res - 1)
+end
+
+-- Define USB options
+newoption({
+    trigger = "usbvendid",
+    value = "Hex number",
+    description = "Specify an alternative USB vendor ID"
+})
+newoption({
+    trigger = "usbprodid",
+    value = "Hex number",
+    description = "Specify an alternative USB product ID"
+})
+newoption({
+    trigger = "usbvendstr",
+    value = "String",
+    description = "Specify an alternative USB vendor string"
+})
+newoption({
+    trigger = "usbprodstr",
+    value = "String",
+    description = "Specify an alternative USB product string"
+})
+newoption({
+    trigger = "usbserialstr",
+    value = "String",
+    description = "Specify an alternative USB serial number"
+})
 
 -- Tested on Ubuntu LTS 16.04.1
 workspace("bootloader-arduinostm32")
@@ -53,7 +102,7 @@ workspace("bootloader-arduinostm32")
         kind("ConsoleApp")
         language("C")
         toolset("gcc")
-        gccprefix(toolchain_prefix)
+        gccprefix(_TOOLCHAIN_PREFIX)
         architecture("ARM")
         characterset("MBCS")
         targetname("bootloader")
@@ -71,10 +120,39 @@ workspace("bootloader-arduinostm32")
             _RA("src/usb_lib/*.c")
         })
 
+        -- USB settings
+        if (_OPTIONS["usbvendid"] ~= nil) then
+            defines({ "USB_DEF_VENDOR_ID=" .. _OPTIONS["usbvendid"] })
+        end
+        if (_OPTIONS["usbprodid"] ~= nil) then
+            defines({ "USB_DEF_PRODUCT_ID=" .. _OPTIONS["usbprodid"] })
+        end
+        if (_OPTIONS["usbrev"] ~= nil) then
+            defines({ "USB_DEF_REVISION=" .. _OPTIONS["usbrev"] })
+        end
+        if (_OPTIONS["usbvendstr"] ~= nil) then
+            defines({ 
+                'USB_DEF_VENDOR_DESC="' .. USB_STR(_OPTIONS["usbvendstr"]) .. '"',
+                "USB_DEF_VENDOR_DESC_LEN=" .. #_OPTIONS["usbvendstr"]
+            })
+        end
+        if (_OPTIONS["usbprodstr"] ~= nil) then
+            defines({ 
+                "USB_DEF_PRODUCT_DESC=" .. USB_STR(_OPTIONS["usbprodstr"]) .. "\"",
+                "USB_DEF_PRODUCT_DESC_LEN=" .. #_OPTIONS["usbprodstr"]
+            })
+        end
+        if (_OPTIONS["usbserialstr"] ~= nil) then
+            defines({ 
+                "USB_DEF_SERIAL_DESC=" .. USB_STR(_OPTIONS["usbserialstr"]) .. "\"",
+                "USB_DEF_SERIAL_DESC_LEN=" .. #_OPTIONS["usbserialstr"]
+            })
+        end
+
         filter("configurations:*")
             optimize("Size")
             buildoptions({
-                "-g -mcpu=" .. chipset,
+                "-g -mcpu=" .. _CHIPSET,
 
                 "-ffunction-sections -fdata-sections",
                 "-Wall -Wimplicit",
@@ -92,9 +170,9 @@ workspace("bootloader-arduinostm32")
 
             postbuildcommands({
                 -- Generate files
-                toolchain_tool("objcopy", "-O ihex %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.hex"),
-                toolchain_tool("objcopy", "-O binary %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.bin"),
-                toolchain_tool("objdump", "-h -S -D %{cfg.buildtarget.relpath} > %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.lss")                
+                TOOLCHAIN_TOOL("objcopy", "-O ihex %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.hex"),
+                TOOLCHAIN_TOOL("objcopy", "-O binary %{cfg.buildtarget.relpath} %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.bin"),
+                TOOLCHAIN_TOOL("objdump", "-h -S -D %{cfg.buildtarget.relpath} > %{cfg.buildtarget.directory}/%{cfg.buildtarget.basename}.lss")                
             })
 
         -- TODO: Different header files for each target so we don't have to do this!
